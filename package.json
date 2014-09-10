@@ -1,0 +1,23 @@
+{
+  "name": "mirobot",
+  "version": "0.0.1",
+  "description": "A node.js library for controlling Mirobot (http://mirobot.io)",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "/bin/false"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/bjpirt/mirobot-js"
+  },
+  "keywords": [
+    "Mirobot",
+    "robot"
+  ],
+  "author": "Ben Pirt",
+  "license": "GPL",
+  "bugs": {
+    "url": "https://github.com/bjpirt/mirobot-js/issues"
+  },
+  "homepage": "http://mirobot.io"
+}

@@ -1,0 +1,14 @@
+#!/usr/bin/env node
+
+var Mirobot = require('../lib/index.js').Mirobot;
+
+var mirobot = new Mirobot();
+mirobot.on('connect', function(){
+  console.log('connected');
+  mirobot.ping(function(){
+    mirobot.left(100);
+  });
+});
+mirobot.debug = true;
+console.log(mirobot)
+mirobot.connect('localhost');
