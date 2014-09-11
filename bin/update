@@ -1,0 +1,41 @@
+#!/usr/bin/env node
+
+var Mirobot = require('../lib/index.js').Mirobot;
+var readline = require('readline');
+var fs = require('fs');
+
+var mirobot = new Mirobot();
+//mirobot.debug = true;
+
+var start = function(){
+  console.log("Starting upgrade");
+  // get firmware file
+  var hex = fs.readFileSync('./firmware.hex', 'ascii');
+
+  // flash device
+  mirobot.updateFirmware(hex, function(succ){
+    if(succ){
+      console.log("Firmware update successful");
+    }else{
+      console.log("Error updating firmware");
+    }
+    mirobot.close();
+  });
+}
+
+
+mirobot.on('connect', start);
+mirobot.on('error', function(err){
+  if(err.type === 'connect'){
+    console.log(err.msg);
+    process.exit(0);
+  }
+});
+
+var host = '10.10.100.254';
+if(process.argv.length > 2){
+  var host = process.argv[2];
+}
+
+mirobot.connect(host);
+
