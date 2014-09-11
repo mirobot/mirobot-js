@@ -1,14 +1,131 @@
 #!/usr/bin/env node
 
 var Mirobot = require('../lib/index.js').Mirobot;
+var readline = require('readline');
+
+var helpText = "Commands:\r\n\
+help                 | Print this message\r\n\
+forward <number>     | Move forward <number> mm\r\n\
+back <number>        | Move back <number> mm\r\n\
+left <number>        | Move left <number> degrees\r\n\
+right <number>       | Move right <number> degrees\r\n\
+pendown              | Move the pen into the down position\r\n\
+penup                | Move the pen into the up position\r\n\
+debug <on|off>       | Print the messages sent to and from Mirobot\r\n\
+version              | Print the firmware version\r\n\
+\r\n\
+You can press tab to autocomplete these commands and use the up and down arrows to scroll through previously entered commands.\r\n";
+
+var completer = function(line){
+  var completions = 'forward back left right penup pendown version debug help'.split(' ')
+  var hits = completions.filter(function(c) { return c.indexOf(line) == 0 })
+  // show all completions if none found
+  return [hits.length ? hits : completions, line]
+}
+
+var rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+  completer: completer
+});
+
+var miroConsole = function(){
+  rl.setPrompt('mirobot> ');
+  rl.prompt();
+
+  rl.on('line', function(line) {
+    var tokens = line.trim().split(' ');
+    var wait = false;
+    var numArgCheck = function(args){
+      if(args.length !== 2){
+        console.log("Error: command should be in the format '" + args[0] + " <number>'");
+        return false;
+      }
+      if(!args[1].match(/^[0-9]+$/)){
+        console.log("Error: argument should a whole, positive number, e.g. '" + args[0] + " 100'");
+        return false;
+      }
+      return true;
+    }
+    switch(tokens[0]) {
+      case 'forward':
+      case 'back':
+      case 'left':
+      case 'right':
+        wait = true;
+        if(numArgCheck(tokens)){
+          console.log("Moving " + tokens[0]);
+          mirobot[tokens[0]](tokens[1], function(status, msg){
+            if(status === 'complete'){
+              console.log("Move " + tokens[0] + " is complete");
+              rl.prompt();
+            }
+          });
+        }else{
+          rl.prompt();
+        }
+        break;
+      case 'penup':
+        wait = true;
+        mirobot.penup(function(status, msg){
+          if(status === 'complete'){
+            console.log("Pen is up");
+            rl.prompt();
+          }
+        });
+        break;
+      case 'pendown':
+        wait = true;
+        mirobot.pendown(function(status, msg){
+          if(status === 'complete'){
+            console.log("Pen is down");
+            rl.prompt();
+          }
+        });
+        break;
+      case 'version':
+        wait = true;
+        mirobot.version(function(status, msg){
+          console.log('Version: ' + msg.msg);
+          rl.prompt();
+        });
+        break;
+      case 'debug':
+        var error = function(){ console.log("Please type either 'debug on' or 'debug off'"); }
+        if(tokens.length == 1){
+          error();
+        }else if(tokens[1] === 'on' || tokens[1] === 'off'){
+          console.log("Turning debug " + tokens[1]);
+          mirobot.debug = (tokens[1] === 'on');
+        }else{
+          error();
+        }
+        break;
+      case 'help':
+      default:
+        console.log(helpText);
+        break;
+    }
+    if(!wait) rl.prompt();
+  }).on('close', function() {
+    console.log('Exiting Mirobot console');
+    process.exit(0);
+  });
+}
 
 var mirobot = new Mirobot();
-mirobot.on('connect', function(){
-  console.log('connected');
-  mirobot.ping(function(){
-    mirobot.left(100);
-  });
+mirobot.on('connect', miroConsole);
+mirobot.on('error', function(err){
+  if(err.type === 'connect'){
+    console.log(err.msg);
+    process.exit(0);
+  }
 });
-mirobot.debug = true;
-console.log(mirobot)
-mirobot.connect('localhost');
+
+var host = '10.10.100.254';
+if(process.argv.length > 2){
+  var host = process.argv[2];
+}
+
+mirobot.connect(host);
+
