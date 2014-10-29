@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
 var Mirobot = require('../lib/index.js').Mirobot;
-var readline = require('readline');
 var fs = require('fs');
 
 var mirobot = new Mirobot();
