@@ -1,6 +1,6 @@
 {
   "name": "mirobot",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "A node.js library for controlling Mirobot (http://mirobot.io)",
   "main": "lib/index.js",
   "scripts": {
@@ -19,5 +19,11 @@
   "bugs": {
     "url": "https://github.com/bjpirt/mirobot-js/issues"
   },
-  "homepage": "http://mirobot.io"
+  "homepage": "http://mirobot.io",
+  "dependencies":{
+    "form-data": ">=0.1.4"
+  },
+  "devDependencies": {
+    "serialport": ">= 1.4.6"
+  }
 }
